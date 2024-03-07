@@ -126,14 +126,14 @@ struct AdjacentScreens {
 
 extension NSScreen {
 
-    func adjustedVisibleFrame(_ ignoreTodo: Bool = false, _ ignoreStage: Bool = false) -> CGRect {
+    func adjustedVisibleFrame(_ ignoreTodo: Bool = false, _ ignoreStage: Bool = false, isFirstHalf: Bool = false) -> CGRect {
         var newFrame = visibleFrame
         
         if !ignoreStage && Defaults.stageSize.value > 0 {
             if StageUtil.stageCapable && StageUtil.stageEnabled && StageUtil.stageStripShow && StageUtil.isStageStripVisible(self) {
                 let stageSize = Defaults.stageSize.value < 1
-                    ? newFrame.size.width * Defaults.stageSize.cgFloat
-                    : Defaults.stageSize.cgFloat
+                ? newFrame.size.width * Defaults.stageSize.cgFloat
+                : Defaults.stageSize.cgFloat
                 
                 if StageUtil.stageStripPosition == .left {
                     newFrame.origin.x += stageSize
@@ -148,8 +148,18 @@ extension NSScreen {
             }
             newFrame.size.width -= Defaults.todoSidebarWidth.cgFloat
         }
-
+        
+        
+        
         if Defaults.screenEdgeGapsOnMainScreenOnly.enabled, self != NSScreen.screens.first {
+            return newFrame
+        }
+        
+        if Defaults.screenEdgeGapsOnExternalScreensOnly.enabled, self == NSScreen.screens.first {
+            return newFrame
+        }
+        
+        if (Defaults.applyGapsToLeftHalf.enabled && !isFirstHalf) {
             return newFrame
         }
 
